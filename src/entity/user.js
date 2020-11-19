@@ -1,20 +1,27 @@
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
+class User extends Model{
+    getFullname() {
+        return [this.firstname, this.lastname].join(' ');
+    }
+}
 
-exports.createModel = (sequelize, DataTypes) => {
-    class User extends Model {}
+exports.createModel = (sequelize) => {
     User.init({
-        firstName: {
-          type: DataTypes.STRING,
-          allowNull: false
-        },
-        lastName: {
-          type: DataTypes.STRING
-          // allowNull defaults to true
-        }
-      }, {
-        // Other model options go here
-        sequelize, // We need to pass the connection instance
-        modelName: 'User' // We need to choose the model name
-      });
+        firstname: DataTypes.TEXT,
+        lastname: DataTypes.TEXT
+      }, { sequelize });
     return User;
 }
+
+// exports.createModel = (sequelize, DataTypes) => {
+//     class User extends Model {
+//         getFullname() {
+//             return [this.firstname, this.lastname].join(' ');
+//           }
+//     }
+//     User.init({
+//         firstname: DataTypes.TEXT,
+//         lastname: DataTypes.TEXT
+//       }, { sequelize });
+//     return User;
+// }

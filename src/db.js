@@ -1,12 +1,12 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes, Model } = require('sequelize');
 const userModel = require("./entity/user.js");
 
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: './db.sqlite'
 });
-const User = userModel.createModel(sequelize, DataTypes);
-console.log(User);
+const User = userModel.createModel(sequelize);
+
 class Database{
     async init(){
         try{
@@ -16,6 +16,8 @@ class Database{
             console.error(e);
         }
         await sequelize.sync();
+        const user = User.build({ firstname: 'Jane', lastname: 'Doe' });
+        console.log(user.getFullname()); // 'Jane Doe'
     }
 }
 
