@@ -1,11 +1,11 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const userModel = require("./entity/user.js");
 
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: './db.sqlite'
 });
-const User = userModel.createModel(sequelize);
+const User = userModel.init(sequelize, DataTypes);
 
 class Database{
     async init(){
