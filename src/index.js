@@ -3,17 +3,21 @@ const { Telegraf } = require('telegraf');
 const { Database } = require("./db.js");
 
 const bot = new Telegraf(process.env.TOKEN);
-bot.start((ctx) => {
+bot.start(async (ctx) => {
     if (ctx.from.is_bot){
         return ctx.reply("You came to wrong door buddy, bot camp two block down");
     }
-    let userData = {
+    const userData = {
         userId: ctx.from.id,
         chatId: ctx.chat.id,
         nickname: ctx.from.username
     }
-    db.addUser(userData);
-    ctx.reply("User added");
+    let user = await db.getUser(userData.userId);
+    console.log(user);
+    if (user.length === 0){
+        await db.addUser(userData);
+        return ctx.reply("User added");
+    }
 });
 const db = new Database();
 

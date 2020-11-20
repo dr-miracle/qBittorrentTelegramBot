@@ -16,10 +16,30 @@ class Database{
             console.error(e);
         }
         await sequelize.sync();
+        await this.populateDb();
+    }
+    async populateDb(){
+        const userData = { 
+            userId: process.env.ADMINID,
+            hasAuth: true
+        };
+        let users = await this.getUser(userData.userId);
+        if (users.length > 0){
+            return;
+        }
+        await this.addUser(userData);
     }
     async addUser(data){
         const user = User.build(data);
         await user.save();
+    }
+    async getUser(id){
+        const user = await User.findAll({
+            where: {
+                userId: id
+            }
+        });
+        return user;
     }
 }
 
