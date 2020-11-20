@@ -12,19 +12,19 @@ class Database{
         try{
             await sequelize.authenticate();
             console.log('Connection has been established successfully.');
+            await sequelize.sync();
+            await this.populateDb();
         }catch(e){
             console.error(e);
         }
-        await sequelize.sync();
-        await this.populateDb();
     }
     async populateDb(){
-        const userData = { 
+        const adminData = { 
             userId: process.env.ADMINID,
             hasAuth: true
         };
-        let users = await this.getUser(userData.userId);
-        if (users.length > 0){
+        let admin = await this.getUserBy(adminData.userId);
+        if (admin){
             return;
         }
         await this.addUser(userData);
@@ -32,13 +32,10 @@ class Database{
     async addUser(data){
         const user = User.build(data);
         await user.save();
+        return user;
     }
-    async getUser(id){
-        const user = await User.findAll({
-            where: {
-                userId: id
-            }
-        });
+    async getUserBy(id){
+        const user = await User.findByPk(id);
         return user;
     }
 }
