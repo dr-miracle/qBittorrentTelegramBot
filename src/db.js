@@ -16,8 +16,10 @@ class Database{
             console.error(e);
         }
         await sequelize.sync();
-        const user = User.build({ firstname: 'Jane', lastname: 'Doe' });
-        console.log(user.getFullname()); // 'Jane Doe'
+    }
+    async addUser(data){
+        const user = User.build(data);
+        await user.save();
     }
 }
 
