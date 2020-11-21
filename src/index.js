@@ -25,12 +25,13 @@ bot.start(async (ctx) => {
     if (!user.hasAuth){
         return ctx.reply("Сказано же, жди ответного гудка!");
     }
+    await ctx.reply("С возвращением, " + userData.nickname);
     if (!isAdmin){
-        return ctx.reply("С возвращением, " + userData.nickname);
+        return;
     }
     let users = await db.getAllUsers();
     if (users.length === 0){
-        return ctx.reply("Нет пользователей для одобрения");
+        return;
     }
     // console.log(users);
     let userAuthList = users
