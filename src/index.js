@@ -12,6 +12,18 @@ const getUserData = (ctx) => {
     return userData;
 }
 const isAdmin = (userData) => userData.userId === process.env.ADMINID;
+bot.on("document", (ctx) => {
+    const isTorrentExtension = (filename) => {
+        const fileExtension = filename.split(".").pop();
+        return fileExtension === "torrent";
+    }
+    const filename = ctx.message.document.file_name;
+    if (isTorrentExtension(filename)){
+        ctx.reply("Add torrent!");
+    }else{
+        ctx.reply("It's not a torrent!");
+    }
+})
 bot.start(async (ctx) => {
     if (ctx.from.is_bot){
         return ctx.reply("You came to wrong door buddy, bot camp two block down");
