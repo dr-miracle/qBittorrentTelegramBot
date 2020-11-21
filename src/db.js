@@ -38,6 +38,10 @@ class Database{
         const user = await User.findByPk(id);
         return user;
     }
+    async getAllUsers(){
+        const users = await User.findAll();
+        return users;
+    }
 }
 
 

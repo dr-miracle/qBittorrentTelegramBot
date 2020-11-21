@@ -15,6 +15,9 @@ module.exports = class User extends Model{
             }
             }, { sequelize });
     }
+    toString(){
+        return `${this.nickname}: ${this.userId}`;
+    }
 }
 
 // exports.createModel = (sequelize) => {
