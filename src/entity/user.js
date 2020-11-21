@@ -1,20 +1,50 @@
 const { Model } = require('sequelize');
 
-exports.createModel = (sequelize, DataTypes) => {
-    class User extends Model {}
-    User.init({
-        firstName: {
-          type: DataTypes.STRING,
-          allowNull: false
-        },
-        lastName: {
-          type: DataTypes.STRING
-          // allowNull defaults to true
-        }
-      }, {
-        // Other model options go here
-        sequelize, // We need to pass the connection instance
-        modelName: 'User' // We need to choose the model name
-      });
-    return User;
+module.exports = class User extends Model{
+    static init(sequelize, DataTypes){
+        return super.init({
+            userId: {
+                type: DataTypes.TEXT,
+                primaryKey: true
+            },
+            chatId: DataTypes.TEXT,
+            nickname: DataTypes.TEXT,
+            hasAuth: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false
+            }
+            }, { sequelize });
+    }
+    toString(){
+        return `${this.nickname}: ${this.userId}`;
+    }
 }
+
+// exports.createModel = (sequelize) => {
+//     User.init({
+//         userId: {
+//             type: DataTypes.TEXT,
+//             primaryKey: true
+//         },
+//         chatId: DataTypes.TEXT,
+//         nickname: DataTypes.TEXT,
+//         hasAuth: {
+//             type: DataTypes.BOOLEAN,
+//             defaultValue: false
+//         }
+//       }, { sequelize });
+//     return User;
+// }
+
+// exports.createModel = (sequelize, DataTypes) => {
+//     class User extends Model {
+//         getFullname() {
+//             return [this.firstname, this.lastname].join(' ');
+//           }
+//     }
+//     User.init({
+//         firstname: DataTypes.TEXT,
+//         lastname: DataTypes.TEXT
+//       }, { sequelize });
+//     return User;
+// }
