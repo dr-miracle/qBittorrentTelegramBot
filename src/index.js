@@ -2,6 +2,7 @@ require('dotenv').config({path: __dirname + '/../config.env'});
 const { Telegraf } = require('telegraf');
 const { MenuTemplate, MenuMiddleware} = require('telegraf-inline-menu')
 const { Database } = require("./db.js");
+const { documentHandler, startHandler } = require("./handlers");
 
 const getNonAuthUsersList = async (ctx) =>{
     let users = await ctx.db.getAllUsers();
@@ -17,16 +18,6 @@ const getNonAuthUsersList = async (ctx) =>{
     return false;
 }
 
-const getUserData = (ctx) => {
-    const userData = {
-        userId: ctx.from.id,
-        chatId: ctx.chat.id,
-        nickname: ctx.from.username
-    }
-    return userData;
-}
-const isAdmin = (userData) => userData.userId === process.env.ADMINID;
-
 const adminMenuTemplate = new MenuTemplate("Доступные действия");
 adminMenuTemplate.interact('Пользователи', 'usersButton', {
     do: getNonAuthUsersList
@@ -36,57 +27,20 @@ const menuMiddleware = new MenuMiddleware('/', adminMenuTemplate);
 const bot = new Telegraf(process.env.TOKEN);
 const db = new Database();
 bot.use(menuMiddleware.middleware());
-bot.on("document", (ctx) => {
-    const isTorrentExtension = (filename) => {
-        const fileExtension = filename.split(".").pop();
-        return fileExtension === "torrent";
-    }
-    const filename = ctx.message.document.file_name;
-    if(!isTorrentExtension(filename)){
-        return;
-    }
-    //show keyboard categories
-    //fs logic
+bot.on("document", documentHandler);
+bot.start(startHandler);
 
-    // if (isTorrentExtension(filename)){
-    //     ctx.reply("Add torrent!");
-    // }else{
-    //     ctx.reply("It's not a torrent!");
-    // }
-})
-bot.start(async (ctx) => {
-    if (ctx.from.is_bot){
-        return ctx.reply("You came to wrong door buddy, bot camp two block down");
-    }
-    const userData = getUserData(ctx);
-    let user = await ctx.db.getUserBy(userData.userId);
-    if (!user){
-        await ctx.db.addUser(userData);
-        return ctx.reply("Жди ответного гудка");
-    }
-    if (!user.hasAuth){
-        return ctx.reply("Сказано же, жди ответного гудка!");
-    }
-    await ctx.reply("С возвращением, " + userData.nickname);
-    if (!isAdmin){
-        return;
-    }
-    bot.use(menuMiddleware.middleware());
-    menuMiddleware.replyToContext(ctx);
-});
-
-const start = async() => {
+const startBot = async() => {
     await db.init();
     bot.context.db = db;
+    bot.context.menu = menuMiddleware;
     bot.catch((err, ctx) =>{
         console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
     });
     bot.startPolling();
-        //     .then(bot.startPolling())
-        // .catch((e) => console.error(e));
 }
 
-start()
+startBot()
     .then(() => console.log("Bot started"))
     .catch((e) => console.log("Bot starting error: " + e));
 
