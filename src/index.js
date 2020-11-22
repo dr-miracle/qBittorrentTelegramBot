@@ -1,10 +1,10 @@
 require('dotenv').config({path: __dirname + '/../config.env'});
 const { Telegraf } = require('telegraf');
-const {MenuTemplate, MenuMiddleware} = require('telegraf-inline-menu')
+const { MenuTemplate, MenuMiddleware} = require('telegraf-inline-menu')
 const { Database } = require("./db.js");
 
 const getNonAuthUsersList = async (ctx) =>{
-    let users = await db.getAllUsers();
+    let users = await ctx.db.getAllUsers();
     if (users.length === 0){
         return ctx.reply("Список пользователей пуст!");
     }
@@ -27,8 +27,8 @@ const getUserData = (ctx) => {
 }
 const isAdmin = (userData) => userData.userId === process.env.ADMINID;
 
-const adminMenuTemplate = new MenuTemplate(ctx => `Hey ${ctx.from.first_name}!`);
-adminMenuTemplate.interact('NonAuthUsers', 'a', {
+const adminMenuTemplate = new MenuTemplate("Доступные действия");
+adminMenuTemplate.interact('Пользователи', 'usersButton', {
     do: getNonAuthUsersList
   });
 const menuMiddleware = new MenuMiddleware('/', adminMenuTemplate);
@@ -59,9 +59,9 @@ bot.start(async (ctx) => {
         return ctx.reply("You came to wrong door buddy, bot camp two block down");
     }
     const userData = getUserData(ctx);
-    let user = await db.getUserBy(userData.userId);
+    let user = await ctx.db.getUserBy(userData.userId);
     if (!user){
-        await db.addUser(userData);
+        await ctx.db.addUser(userData);
         return ctx.reply("Жди ответного гудка");
     }
     if (!user.hasAuth){
@@ -71,13 +71,19 @@ bot.start(async (ctx) => {
     if (!isAdmin){
         return;
     }
+    bot.use(menuMiddleware.middleware());
     menuMiddleware.replyToContext(ctx);
 });
 
 const start = async() => {
-    await db.init()
-        .then(bot.startPolling())
-        .catch((e) => console.error(e));
+    await db.init();
+    bot.context.db = db;
+    bot.catch((err, ctx) =>{
+        console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
+    });
+    bot.startPolling();
+        //     .then(bot.startPolling())
+        // .catch((e) => console.error(e));
 }
 
 start()
