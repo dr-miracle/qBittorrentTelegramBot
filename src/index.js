@@ -1,70 +1,81 @@
 require('dotenv').config({path: __dirname + '/../config.env'});
 const { Telegraf } = require('telegraf');
+const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require('telegraf-inline-menu')
 const { Database } = require("./db.js");
+const { documentHandler, startHandler } = require("./handlers");
 
-const bot = new Telegraf(process.env.TOKEN);
-const getUserData = (ctx) => {
-    const userData = {
-        userId: ctx.from.id,
-        chatId: ctx.chat.id,
-        nickname: ctx.from.username
-    }
-    return userData;
-}
-const isAdmin = (userData) => userData.userId === process.env.ADMINID;
-bot.on("document", (ctx) => {
-    const isTorrentExtension = (filename) => {
-        const fileExtension = filename.split(".").pop();
-        return fileExtension === "torrent";
-    }
-    const filename = ctx.message.document.file_name;
-    if (isTorrentExtension(filename)){
-        ctx.reply("Add torrent!");
-    }else{
-        ctx.reply("It's not a torrent!");
-    }
-})
-bot.start(async (ctx) => {
-    if (ctx.from.is_bot){
-        return ctx.reply("You came to wrong door buddy, bot camp two block down");
-    }
-    const userData = getUserData(ctx);
-    let user = await db.getUserBy(userData.userId);
-    if (!user){
-        await db.addUser(userData);
-        return ctx.reply("Жди ответного гудка");
-    }
-    if (!user.hasAuth){
-        return ctx.reply("Сказано же, жди ответного гудка!");
-    }
-    await ctx.reply("С возвращением, " + userData.nickname);
-    if (!isAdmin){
-        return;
-    }
-    let users = await db.getAllUsers();
+const getNonAuthUsersList = async (ctx) =>{
+    let users = await ctx.db.getAllUsers();
     if (users.length === 0){
-        return;
+        return ctx.reply("Список пользователей пуст!");
     }
-    // console.log(users);
     let userAuthList = users
         .filter(u => !u.hasAuth)
         .map(u => u.toString())
         .join("\\n");
-    await ctx.reply("Список пользователей для одобрения:")
-    return ctx.reply(userAuthList);
-});
-
-const db = new Database();
-
-const start = async() => {
-    await db.init()
-        .then(bot.startPolling())
-        .catch((e) => console.error(e));
+    await ctx.reply("Список пользователей для одобрения:");
+    await ctx.reply(userAuthList);
+    return false;
 }
 
-start()
+const adminMenuTemplate = new MenuTemplate("Доступные действия");
+adminMenuTemplate.interact('Пользователи', 'usersButton', {
+    do: getNonAuthUsersList
+  });
+
+const torrentCategoriesMenuTemplate = new MenuTemplate("Категория торрента?");
+torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Book", "Anime"], {
+    do: async(ctx, key) => {
+        const result = ctx.update.callback_query.message;
+        console.log(ctx.torrentFileId);
+        // ctx.callbackQuery.choice = key;
+        console.log(ctx.callbackQuery);
+        // console.log(result.from);
+        // console.log(result.message);
+        await ctx.telegram.deleteMessage(result.chat.id, result.message_id);
+        //fs logic
+        // deleteMenuFromContext(ctx);
+        // console.log(key);
+        return false;
+    }
+})
+// const adminMenuMiddleware = new MenuMiddleware('/', adminMenuTemplate);
+const torrentMenuMiddleware = new MenuMiddleware("/", torrentCategoriesMenuTemplate);
+
+const bot = new Telegraf(process.env.TOKEN);
+const db = new Database();
+// bot.use(adminMenuMiddleware.middleware());
+// bot.use((ctx, next) => {
+//     let documentChoises
+//     if (ctx.callbackQuery) {
+//         console.log('ctx:', ctx);
+//         console.log('callback query:', ctx.callbackQuery);
+// 		console.log('callback data just happened', ctx.callbackQuery.data)
+// 	}
+//     return next();
+// });
+
+bot.use(torrentMenuMiddleware.middleware());
+bot.on("document", documentHandler);
+bot.start(startHandler);
+
+const startBot = async() => {
+    await db.init();
+    bot.context.db = db;
+    bot.context.menu = { 
+        // adminMenuMiddleware,
+        torrentMenuMiddleware
+     };
+    bot.catch((err, ctx) =>{
+        console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
+    });
+    bot.startPolling();
+}
+
+startBot()
     .then(() => console.log("Bot started"))
     .catch((e) => console.log("Bot starting error: " + e));
+
 // bot.launch()
 // bot.telegram.sendMessage(process.env.CHATID, "Test message")
 //     .then(() => {
