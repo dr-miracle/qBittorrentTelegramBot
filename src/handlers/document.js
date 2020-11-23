@@ -4,15 +4,11 @@ module.exports = async (ctx) => {
         return fileExtension === "torrent";
     }
     const filename = ctx.message.document.file_name;
+    console.log(ctx.message.document);
     if(!isTorrentExtension(filename)){
-        return;
+        return ctx.reply("It's not a torrent!");;
     }
     //show keyboard categories
+    await ctx.menu.torrentMenuMiddleware.replyToContext(ctx);
     //fs logic
-
-    // if (isTorrentExtension(filename)){
-    //     ctx.reply("Add torrent!");
-    // }else{
-    //     ctx.reply("It's not a torrent!");
-    // }
 }

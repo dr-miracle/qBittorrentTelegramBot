@@ -26,5 +26,5 @@ module.exports = async(ctx) => {
     if (!isAdmin){
         return;
     }
-    ctx.menu.replyToContext(ctx);
+    // ctx.menu.adminMenuMiddleware.replyToContext(ctx);
 }
