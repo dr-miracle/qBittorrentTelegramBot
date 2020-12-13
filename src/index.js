@@ -27,12 +27,9 @@ const torrentCategoriesMenuTemplate = new MenuTemplate("Категория то�
 torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Book", "Anime"], {
     do: async(ctx, key) => {
         const result = ctx.update.callback_query.message;
-        console.log(ctx.torrentFileId);
-        // ctx.callbackQuery.choice = key;
-        console.log(ctx.callbackQuery);
-        // console.log(result.from);
-        // console.log(result.message);
+        console.log(ctx.torrent);
         await ctx.telegram.deleteMessage(result.chat.id, result.message_id);
+        await ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId);
         //fs logic
         // deleteMenuFromContext(ctx);
         // console.log(key);
@@ -66,6 +63,10 @@ const startBot = async() => {
         // adminMenuMiddleware,
         torrentMenuMiddleware
      };
+     bot.context.torrent = {
+         messageId: null,
+         torrentId: null
+     }
     bot.catch((err, ctx) =>{
         console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
     });
