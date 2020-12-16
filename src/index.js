@@ -3,6 +3,7 @@ const { Telegraf } = require('telegraf');
 const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require('telegraf-inline-menu')
 const { Database } = require("./db.js");
 const { documentHandler, startHandler } = require("./handlers");
+const { initFs } = require("./fs")
 
 const getNonAuthUsersList = async (ctx) =>{
     let users = await ctx.db.getAllUsers();
@@ -56,7 +57,16 @@ bot.use(torrentMenuMiddleware.middleware());
 bot.on("document", documentHandler);
 bot.start(startHandler);
 
+//todo
+//1. удалить бд
+//2. вместо бд сделать json файл со списком доверенных пользователей
+//3. в json файл так же записать настройки - токен, id админа, добавить объект с списком категорий
+//и путем к папке с торрентами
+//4. удалить мусор
+
+
 const startBot = async() => {
+    await initFs("../torrents");
     await db.init();
     bot.context.db = db;
     bot.context.menu = { 
