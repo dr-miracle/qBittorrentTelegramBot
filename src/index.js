@@ -10,9 +10,11 @@ const torrentCategoriesMenuTemplate = new MenuTemplate("Категория то�
 torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Book", "Anime"], {
     do: async(ctx, key) => {
         const result = ctx.update.callback_query.message;
-        console.log(ctx.torrent);
-        await ctx.telegram.deleteMessage(result.chat.id, result.message_id);
-        await ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId);
+        const file = await ctx.telegram.getFile(ctx.torrent.torrentId);
+        const filelink = await ctx.telegram.getFileLink(file.file_id);
+
+        // await ctx.telegram.deleteMessage(result.chat.id, result.message_id);
+        // await ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId);
         //fs logic
         // console.log(key);
         return false;
@@ -25,7 +27,7 @@ bot.use(async (ctx, next) => {
     if (ctx.from.is_bot){
         return ctx.reply("You came to wrong door buddy, bot camp two block down");
     }
-    let user = users.includes(ctx.chat.id);
+    let user = users.includes(ctx.chat.id.toString());
     if (!user){
         return ctx.reply("Move along, stranger");
     }
@@ -34,14 +36,6 @@ bot.use(async (ctx, next) => {
 bot.use(torrentMenuMiddleware.middleware());
 bot.on("document", documentHandler);
 bot.start(startHandler);
-
-//todo
-//1. удалить бд check
-//2. вместо бд сделать json файл со списком доверенных пользователей check
-//3. в json файл так же записать настройки - токен, id админа, добавить объект с списком категорий
-//и путем к папке с торрентами check
-//4. удалить мусор
-
 
 const startBot = async() => {
     await initFs("../torrents");
