@@ -7,24 +7,22 @@ const getUserData = (ctx) => {
     }
     return userData;
 }
-const isAdmin = (userData) => userData.userId === process.env.ADMINID;
+
+const users = (() => process.env.USERS.split(","))();
 
 module.exports = async(ctx) => {
     if (ctx.from.is_bot){
         return ctx.reply("You came to wrong door buddy, bot camp two block down");
     }
     const userData = getUserData(ctx);
-    let user = await ctx.db.getUserBy(userData.userId);
+    let user = users.includes(userData.userId.toString());
+    console.log(user);
+    console.log(userData.userId);
     if (!user){
-        await ctx.db.addUser(userData);
-        return ctx.reply("Жди ответного гудка");
-    }
-    if (!user.hasAuth){
-        return ctx.reply("Сказано же, жди ответного гудка!");
+        return ctx.reply("Move along, stranger");
     }
     await ctx.reply("С возвращением, " + userData.nickname);
     if (!isAdmin){
         return;
     }
-    // ctx.menu.adminMenuMiddleware.replyToContext(ctx);
 }
