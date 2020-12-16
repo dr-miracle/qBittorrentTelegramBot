@@ -3,6 +3,7 @@ const { Telegraf } = require('telegraf');
 const { MenuTemplate, MenuMiddleware} = require('telegraf-inline-menu')
 const { documentHandler, startHandler } = require("./handlers");
 const { initFs } = require("./fs")
+const users = (() => process.env.USERS.split(","))();
 
 
 const torrentCategoriesMenuTemplate = new MenuTemplate("Категория торрента?");
@@ -20,7 +21,16 @@ torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Boo
 const torrentMenuMiddleware = new MenuMiddleware("/", torrentCategoriesMenuTemplate);
 
 const bot = new Telegraf(process.env.TOKEN);
-
+bot.use(async (ctx, next) => {
+    if (ctx.from.is_bot){
+        return ctx.reply("You came to wrong door buddy, bot camp two block down");
+    }
+    let user = users.includes(ctx.chat.id);
+    if (!user){
+        return ctx.reply("Move along, stranger");
+    }
+    next();
+  })
 bot.use(torrentMenuMiddleware.middleware());
 bot.on("document", documentHandler);
 bot.start(startHandler);

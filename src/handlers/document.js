@@ -1,5 +1,4 @@
 module.exports = async (ctx) => {
-    console.log(this);
     const isTorrentExtension = (filename) => {
         const fileExtension = filename.split(".").pop();
         return fileExtension === "torrent";
