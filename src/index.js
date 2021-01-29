@@ -4,7 +4,8 @@ const { MenuTemplate, MenuMiddleware} = require('telegraf-inline-menu')
 const { documentHandler, startHandler } = require("./handlers");
 const { initFs } = require("./fs")
 const users = (() => process.env.USERS.split(","))();
-
+var https = require('https');
+const fs = require('fs');
 
 const torrentCategoriesMenuTemplate = new MenuTemplate("Категория торрента?");
 torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Book", "Anime"], {
@@ -12,6 +13,27 @@ torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Boo
         const result = ctx.update.callback_query.message;
         const file = await ctx.telegram.getFile(ctx.torrent.torrentId);
         const filelink = await ctx.telegram.getFileLink(file.file_id);
+        // console.log(file);
+        // console.log(filelink);
+        console.log(ctx.torrent)
+
+        let stream = fs.createWriteStream(`./${ctx.torrent.filename}`);
+        const fsPromise = new Promise( (resolve, reject) => {
+            const request = https.get(filelink, resp => {
+                if (resp.statusCode !== 200){
+                    reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
+                }
+                return resp.pipe(stream);
+            })
+            stream.on("finish", () => resolve(file));
+            stream.on('error', err => {
+                fs.unlink(filePath, () => reject(err));
+              });
+            request.on('error', err => {
+                fs.unlink(filePath, () => reject(err));
+              });
+        })
+        return await fsPromise.then( res => true, err => false);
 
         // await ctx.telegram.deleteMessage(result.chat.id, result.message_id);
         // await ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId);
@@ -44,7 +66,8 @@ const startBot = async() => {
      };
      bot.context.torrent = {
          messageId: null,
-         torrentId: null
+         torrentId: null,
+         filename: null
      }
     bot.catch((err, ctx) =>{
         console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
