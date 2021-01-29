@@ -1,6 +1,6 @@
 require('dotenv').config({path: __dirname + '/../config.env'});
 const { Telegraf } = require('telegraf');
-const { MenuTemplate, MenuMiddleware} = require('telegraf-inline-menu')
+const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require('telegraf-inline-menu')
 const { documentHandler, startHandler } = require("./handlers");
 const { initFs } = require("./fs")
 const users = (() => process.env.USERS.split(","))();
@@ -13,15 +13,12 @@ torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Boo
         const result = ctx.update.callback_query.message;
         const file = await ctx.telegram.getFile(ctx.torrent.torrentId);
         const filelink = await ctx.telegram.getFileLink(file.file_id);
-        // console.log(file);
-        // console.log(filelink);
-        console.log(ctx.torrent)
 
         let stream = fs.createWriteStream(`./${ctx.torrent.filename}`);
         const fsPromise = new Promise( (resolve, reject) => {
             const request = https.get(filelink, resp => {
                 if (resp.statusCode !== 200){
-                    reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
+                    reject(new Error(`Failed to get '${filelink}' (${response.statusCode})`));
                 }
                 return resp.pipe(stream);
             })
@@ -33,10 +30,16 @@ torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Boo
                 fs.unlink(filePath, () => reject(err));
               });
         })
-        return await fsPromise.then( res => true, err => false);
-
-        // await ctx.telegram.deleteMessage(result.chat.id, result.message_id);
-        // await ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId);
+        return await fsPromise
+            .then(res => true, err => false);
+            // .then((res) => ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId))
+            // .then((res) => {
+            //     deleteMenuFromContext(ctx);
+            //     return true;
+            // })
+            // .catch(err => console.log(err));
+            // .then((res) => ctx.telegram.deleteMessage(result.chat.id, result.message_id))
+            // .then((res) => ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId - 1));
         //fs logic
         // console.log(key);
         return false;
