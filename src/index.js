@@ -2,10 +2,11 @@ require('dotenv').config({path: __dirname + '/../config.env'});
 const { Telegraf } = require('telegraf');
 const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require('telegraf-inline-menu')
 const { documentHandler, startHandler } = require("./handlers");
-const { initFs } = require("./fs")
+const TorrentsFilesystem = require("./fs");
+// const fs = require('fs');
+
 const users = (() => process.env.USERS.split(","))();
-var https = require('https');
-const fs = require('fs');
+const torrentFs = new TorrentsFilesystem(process.env.STORAGE);
 
 const torrentCategoriesMenuTemplate = new MenuTemplate("Категория торрента?");
 torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Book", "Anime"], {
@@ -13,23 +14,7 @@ torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Boo
         const result = ctx.update.callback_query.message;
         const file = await ctx.telegram.getFile(ctx.torrent.torrentId);
         const filelink = await ctx.telegram.getFileLink(file.file_id);
-
-        let stream = fs.createWriteStream(`./${ctx.torrent.filename}`);
-        const fsPromise = new Promise( (resolve, reject) => {
-            const request = https.get(filelink, resp => {
-                if (resp.statusCode !== 200){
-                    reject(new Error(`Failed to get '${filelink}' (${response.statusCode})`));
-                }
-                return resp.pipe(stream);
-            })
-            stream.on("finish", () => resolve(file));
-            stream.on('error', err => {
-                fs.unlink(filePath, () => reject(err));
-              });
-            request.on('error', err => {
-                fs.unlink(filePath, () => reject(err));
-              });
-        })
+        const fsPromise = torrentFs.save(filelink, ctx.torrent.filename, key);
         return await fsPromise
             .then(res => true, err => false);
             // .then((res) => ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId))
@@ -40,8 +25,10 @@ torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Boo
             // .catch(err => console.log(err));
             // .then((res) => ctx.telegram.deleteMessage(result.chat.id, result.message_id))
             // .then((res) => ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId - 1));
-        //fs logic
-        // console.log(key);
+        //todo: 
+        //добавить ответ
+        //выяснить почему ошибка при удалении сообщений
+        //
         return false;
     }
 })
@@ -63,7 +50,7 @@ bot.on("document", documentHandler);
 bot.start(startHandler);
 
 const startBot = async() => {
-    await initFs("../torrents");
+    await torrentFs.initFs();
     bot.context.menu = { 
         torrentMenuMiddleware
      };
