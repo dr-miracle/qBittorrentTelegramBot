@@ -4,7 +4,6 @@ const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require('telegraf
 const { documentHandler, startHandler } = require("./handlers");
 const TorrentsFilesystem = require("./fs");
 // const fs = require('fs');
-
 const users = (() => process.env.USERS.split(","))();
 const torrentFs = new TorrentsFilesystem(process.env.STORAGE);
 
@@ -14,22 +13,20 @@ torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Boo
         const result = ctx.update.callback_query.message;
         const file = await ctx.telegram.getFile(ctx.torrent.torrentId);
         const filelink = await ctx.telegram.getFileLink(file.file_id);
+        // await deleteMenuFromContext(ctx);
+        // return false;
         const fsPromise = torrentFs.save(filelink, ctx.torrent.filename, key);
-        return await fsPromise
-            .then(res => true, err => false);
-            // .then((res) => ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId))
-            // .then((res) => {
-            //     deleteMenuFromContext(ctx);
-            //     return true;
-            // })
-            // .catch(err => console.log(err));
-            // .then((res) => ctx.telegram.deleteMessage(result.chat.id, result.message_id))
-            // .then((res) => ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId - 1));
-        //todo: 
-        //добавить ответ
-        //выяснить почему ошибка при удалении сообщений
-        //
-        return false;
+        return fsPromise
+            .then(_ => {
+                return ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId)
+            })
+            .then(_ => {
+                return deleteMenuFromContext(ctx);
+            })
+            .then(_ => {
+                return false;
+            })
+            .catch(err => console.log('Something going wrong when choose menu: ', err));
     }
 })
 const torrentMenuMiddleware = new MenuMiddleware("/", torrentCategoriesMenuTemplate);
