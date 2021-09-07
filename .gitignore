@@ -1,2 +1,7 @@
 node_modules
 *.env
+src/._.DS_Store
+src/.DS_Store
+*.DS_Store
+._.gitignore
+._README.md

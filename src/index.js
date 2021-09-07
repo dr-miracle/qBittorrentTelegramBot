@@ -3,18 +3,15 @@ const { Telegraf } = require('telegraf');
 const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require('telegraf-inline-menu')
 const { documentHandler, startHandler } = require("./handlers");
 const TorrentsFilesystem = require("./fs");
-// const fs = require('fs');
 const users = (() => process.env.USERS.split(","))();
 const torrentFs = new TorrentsFilesystem(process.env.STORAGE);
 
 const torrentCategoriesMenuTemplate = new MenuTemplate("Категория торрента?");
-torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Book", "Anime"], {
+torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Films', "Book", "Anime"], {
     do: async(ctx, key) => {
         const result = ctx.update.callback_query.message;
         const file = await ctx.telegram.getFile(ctx.torrent.torrentId);
         const filelink = await ctx.telegram.getFileLink(file.file_id);
-        // await deleteMenuFromContext(ctx);
-        // return false;
         const fsPromise = torrentFs.save(filelink, ctx.torrent.filename, key);
         return fsPromise
             .then(_ => {
@@ -26,7 +23,10 @@ torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Film', "Boo
             .then(_ => {
                 return false;
             })
-            .catch(err => console.log('Something going wrong when choose menu: ', err));
+            .catch(err => {
+                console.log('Something going wrong when choose menu: ', err);
+                return false;
+            });
     }
 })
 const torrentMenuMiddleware = new MenuMiddleware("/", torrentCategoriesMenuTemplate);
