@@ -12,5 +12,4 @@ module.exports = async (ctx) => {
     }
     //show keyboard categories
     await ctx.menu.torrentMenuMiddleware.replyToContext(ctx);
-    //fs logic
 }

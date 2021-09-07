@@ -1,51 +1,21 @@
-require('dotenv').config({path: __dirname + '/../config.env'});
-const { Telegraf } = require('telegraf');
-const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require('telegraf-inline-menu')
-const { documentHandler, startHandler } = require("./handlers");
-const TorrentsFilesystem = require("./fs");
-const users = (() => process.env.USERS.split(","))();
-const torrentFs = new TorrentsFilesystem(process.env.STORAGE);
+const { Telegraf } = require("telegraf");
 
-const torrentCategoriesMenuTemplate = new MenuTemplate("Категория торрента?");
-torrentCategoriesMenuTemplate.choose('torrentSelectButtons', ["TV", 'Films', "Book", "Anime"], {
-    do: async(ctx, key) => {
-        const result = ctx.update.callback_query.message;
-        const file = await ctx.telegram.getFile(ctx.torrent.torrentId);
-        const filelink = await ctx.telegram.getFileLink(file.file_id);
-        const fsPromise = torrentFs.save(filelink, ctx.torrent.filename, key);
-        return fsPromise
-            .then(_ => {
-                return ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId)
-            })
-            .then(_ => {
-                return deleteMenuFromContext(ctx);
-            })
-            .then(_ => {
-                return false;
-            })
-            .catch(err => {
-                console.log('Something going wrong when choose menu: ', err);
-                return false;
-            });
-    }
-})
-const torrentMenuMiddleware = new MenuMiddleware("/", torrentCategoriesMenuTemplate);
+require("dotenv").config({path: __dirname + "/../config.env"});
+const categories = (() => process.env.CATEGORIES.split(","))();
+const TorrentsFilesystem = require("./helpers/fs");
+const torrentFs = new TorrentsFilesystem(process.env.STORAGE, categories);
+
+const Auth = require("./helpers/auth");
+const userAuth = new Auth("./users.json");
+const authMiddleware = require("./middleware/auth")(userAuth);
+const torrentMenuMiddleware = require("./middleware/torrentMenu")(torrentFs);
+const { documentHandler, startHandler } = require("./handlers");
 
 const bot = new Telegraf(process.env.TOKEN);
-bot.use(async (ctx, next) => {
-    if (ctx.from.is_bot){
-        return ctx.reply("You came to wrong door buddy, bot camp two block down");
-    }
-    let user = users.includes(ctx.chat.id.toString());
-    if (!user){
-        return ctx.reply("Move along, stranger");
-    }
-    next();
-  })
-bot.use(torrentMenuMiddleware.middleware());
+bot.use(authMiddleware);
+bot.use(torrentMenuMiddleware);
 bot.on("document", documentHandler);
 bot.start(startHandler);
-
 const startBot = async() => {
     await torrentFs.initFs();
     bot.context.menu = { 
@@ -65,3 +35,10 @@ const startBot = async() => {
 startBot()
     .then(() => console.log("Bot started"))
     .catch((e) => console.log("Bot starting error: " + e));
+
+process.on("exit", (code) => {
+    userAuth.save();
+})
+process.on("SIGINT", () => {
+    process.exit(1);
+})
