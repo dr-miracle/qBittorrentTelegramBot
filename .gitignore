@@ -5,3 +5,4 @@ src/.DS_Store
 *.DS_Store
 ._.gitignore
 ._README.md
+package-lock.json
