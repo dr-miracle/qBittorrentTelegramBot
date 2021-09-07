@@ -6,3 +6,4 @@ src/.DS_Store
 ._.gitignore
 ._README.md
 package-lock.json
+users.json
