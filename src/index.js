@@ -1,44 +1,34 @@
-const { Telegraf } = require("telegraf");
-
 require("dotenv").config({path: __dirname + "/../config.env"});
-const categories = (() => process.env.CATEGORIES.split(","))();
-const TorrentsFilesystem = require("./helpers/fs");
-const torrentFs = new TorrentsFilesystem(process.env.STORAGE, categories);
+const http = require("http");
+const express = require("express");
+const bot = require("./bot");
 
-const Auth = require("./helpers/auth");
-const userAuth = new Auth("./users.json");
-const authMiddleware = require("./middleware/auth")(userAuth);
-const torrentMenuMiddleware = require("./middleware/torrentMenu")(torrentFs);
-const { documentHandler, startHandler } = require("./handlers");
+const app = express();
+app.set("port", process.env.PORT || 3000);
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.post('/report', async (req, res) => {
+    const data = req.body;
+    await bot.report(data);
+    return res.status(200).send({});
+});
+app.use((req, res) => {
+    return res.status(404).send({});
+});
 
-const bot = new Telegraf(process.env.TOKEN);
-bot.use(authMiddleware);
-bot.use(torrentMenuMiddleware);
-bot.on("document", documentHandler);
-bot.start(startHandler);
-const startBot = async() => {
-    await torrentFs.initFs();
-    bot.context.menu = { 
-        torrentMenuMiddleware
-     };
-     bot.context.torrent = {
-         messageId: null,
-         torrentId: null,
-         filename: null
-     }
-    bot.catch((err, ctx) =>{
-        console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
-    });
-    bot.startPolling();
-}
-
-startBot()
-    .then(() => console.log("Bot started"))
-    .catch((e) => console.log("Bot starting error: " + e));
-
-process.on("exit", (code) => {
-    userAuth.save();
-})
-process.on("SIGINT", () => {
+process.once("exit", (code) => {
+    bot.stop();
+});
+process.once("SIGINT", () => {
     process.exit(1);
-})
+});
+process.once("SIGTERM", () => {
+    process.exit(1);
+});
+
+http.createServer(app).listen(process.env.PORT || 3000, () => {
+    console.log(`Run server on localhost:${process.env.port || 3000}`);
+    bot.start()
+        .then(() => console.log("Bot started"))
+        .catch((e) => console.log("Bot starting error: " + e));
+});

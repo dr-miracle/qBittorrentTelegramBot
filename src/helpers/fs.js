@@ -1,8 +1,6 @@
 const fs = require('fs');
 const https = require('https');
 
-// const categories = ["TV", "Films", "Anime", "Book", "Other"]
-
 module.exports = class TorrentsFilesystem{
     constructor(pathTo, categories){
         this.pathTo = pathTo;
@@ -12,9 +10,7 @@ module.exports = class TorrentsFilesystem{
     async initFs(){
         let dirs = [];
         this.categories.forEach(category => {
-            console.log(category);
             const path = this.getFullPath(category);
-            console.log(path);
             if (!fs.existsSync(path)){
                 const dir = fs.mkdir(path, {recursive: true}, () => {});
                 dirs.push(dir);

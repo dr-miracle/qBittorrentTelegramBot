@@ -29,4 +29,8 @@ module.exports = class AuthTelegramUser{
         "\t");
         fs.writeFileSync(this.jsonPath, json);
     }
+    //заменить на геттер
+    chats(){
+        return Object.values(this.users);
+    }
 }
