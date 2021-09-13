@@ -23,7 +23,7 @@ const start = async() => {
      };
      bot.context.torrent = {
          messageId: null,
-         torrentId: null,
+         link: null,
          filename: null
      }
     bot.catch((err, ctx) =>{

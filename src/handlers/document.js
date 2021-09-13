@@ -5,8 +5,9 @@ module.exports = async (ctx) => {
     }
     const filename = ctx.message.document.file_name;
     ctx.torrent.messageId = ctx.message.message_id;
-    ctx.torrent.torrentId = ctx.message.document.file_id;
     ctx.torrent.filename = ctx.message.document.file_name;
+    const filelink = await ctx.telegram.getFileLink(ctx.message.document.file_id);
+    ctx.torrent.link = filelink;
     if(!isTorrentExtension(filename)){
         return ctx.reply("Это не торрент! >.<");;
     }
