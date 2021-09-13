@@ -1,7 +1,9 @@
-const documentHandler = require("./document");
-const startHandler = require("./start");
+const document = require("./document");
+const start = require("./start");
+const help = require("./help")
 
 module.exports = {
-    documentHandler,
-    startHandler
+    document,
+    start,
+    help, 
 }

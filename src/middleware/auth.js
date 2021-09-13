@@ -1,7 +1,8 @@
 module.exports = (userAuth) => {
         return async(ctx, next) => {
             if (ctx.from.is_bot){
-                return ctx.reply("You came to wrong door buddy, bot camp two block down");
+                ctx.reply("You came to wrong door buddy, bot camp two block's down");
+                return ctx.leaveChat();
             }
             let hasUser = userAuth.hasUser(ctx.from.id);
             if (hasUser){
@@ -9,11 +10,11 @@ module.exports = (userAuth) => {
             }
             const text = ctx.message.text;
             const isAdded = userAuth.addUser(ctx.from.id, ctx.chat.id, text);
-            console.log(text, isAdded);
             if (isAdded){
+                await ctx.reply('Welcome to the club, buddy');
                 return next();
             }else{
-                return ctx.reply("Incorrect passphrase");
+                return ctx.reply("Parole?");
             }
         }
 };

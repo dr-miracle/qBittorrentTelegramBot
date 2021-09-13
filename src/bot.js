@@ -7,12 +7,13 @@ const Auth = require("./helpers/auth");
 const userAuth = new Auth("./users.json");
 const authMiddleware = require("./middleware/auth")(userAuth);
 const torrentMenuMiddleware = require("./middleware/torrentMenu")(torrentFs, categories);
-const { documentHandler, startHandler } = require("./handlers");
+const { document, start: startHandler, help } = require("./handlers");
 
 const bot = new Telegraf(process.env.TOKEN);
 bot.use(authMiddleware);
 bot.use(torrentMenuMiddleware.middleware());
-bot.on("document", documentHandler);
+bot.on("document", document);
+bot.help(help);
 bot.start(startHandler);
 
 const start = async() => {

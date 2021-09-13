@@ -8,7 +8,7 @@ module.exports = async (ctx) => {
     ctx.torrent.torrentId = ctx.message.document.file_id;
     ctx.torrent.filename = ctx.message.document.file_name;
     if(!isTorrentExtension(filename)){
-        return ctx.reply("It's not a torrent!");;
+        return ctx.reply("Это не торрент! >.<");;
     }
     //show keyboard categories
     await ctx.menu.torrentMenuMiddleware.replyToContext(ctx);
