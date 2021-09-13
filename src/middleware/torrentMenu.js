@@ -1,8 +1,8 @@
 const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require("telegraf-inline-menu")
 const torrentCategoriesMenuTemplate = new MenuTemplate("Категория торрента?");
 
-module.exports = (torrentFs) => {
-    torrentCategoriesMenuTemplate.choose("torrentSelectButtons", ["TV", "Films", "Book", "Anime"], {
+module.exports = (torrentFs, categories) => {
+    torrentCategoriesMenuTemplate.choose("torrentSelectButtons", categories, {
         do: async(ctx, key) => {
             const result = ctx.update.callback_query.message;
             const file = await ctx.telegram.getFile(ctx.torrent.torrentId);

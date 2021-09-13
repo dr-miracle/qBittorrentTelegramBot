@@ -6,7 +6,7 @@ const torrentFs = new TorrentsFilesystem(process.env.STORAGE, categories);
 const Auth = require("./helpers/auth");
 const userAuth = new Auth("./users.json");
 const authMiddleware = require("./middleware/auth")(userAuth);
-const torrentMenuMiddleware = require("./middleware/torrentMenu")(torrentFs);
+const torrentMenuMiddleware = require("./middleware/torrentMenu")(torrentFs, categories);
 const { documentHandler, startHandler } = require("./handlers");
 
 const bot = new Telegraf(process.env.TOKEN);
