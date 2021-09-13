@@ -25,5 +25,5 @@ module.exports = (torrentFs) => {
         }
     });
     const torrentMenuMiddleware = new MenuMiddleware("/", torrentCategoriesMenuTemplate);
-    return torrentMenuMiddleware.middleware();
+    return torrentMenuMiddleware;
 }

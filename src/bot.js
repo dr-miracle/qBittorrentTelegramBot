@@ -11,7 +11,7 @@ const { documentHandler, startHandler } = require("./handlers");
 
 const bot = new Telegraf(process.env.TOKEN);
 bot.use(authMiddleware);
-bot.use(torrentMenuMiddleware);
+bot.use(torrentMenuMiddleware.middleware());
 bot.on("document", documentHandler);
 bot.start(startHandler);
 
