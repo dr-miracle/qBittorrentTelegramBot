@@ -12,5 +12,5 @@ module.exports = async (ctx) => {
         return ctx.reply("Это не торрент! >.<");;
     }
     //show keyboard categories
-    await ctx.menu.torrentMenuMiddleware.replyToContext(ctx);
+    await ctx.menu.torrentMenu.replyToContext(ctx, '/category/');
 }

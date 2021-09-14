@@ -1,8 +1,8 @@
-const { MenuTemplate, MenuMiddleware, deleteMenuFromContext} = require("telegraf-inline-menu")
-const torrentCategoriesMenuTemplate = new MenuTemplate("Категория торрента?");
+const { MenuTemplate, deleteMenuFromContext} = require("telegraf-inline-menu");
 
 module.exports = (torrentFs, categories) => {
-    torrentCategoriesMenuTemplate.choose("torrentSelectButtons", categories, {
+    const categoriesMenu = new MenuTemplate("Категория торрента?");
+    categoriesMenu.choose("category", categories, {
         do: async(ctx, categoryKey) => {
             const result = ctx.update.callback_query.message;
             const fsPromise = torrentFs.save(ctx.torrent.link, ctx.torrent.filename, categoryKey);
@@ -22,6 +22,5 @@ module.exports = (torrentFs, categories) => {
                 });
         }
     });
-    const torrentMenuMiddleware = new MenuMiddleware("/", torrentCategoriesMenuTemplate);
-    return torrentMenuMiddleware;
+    return categoriesMenu;
 }

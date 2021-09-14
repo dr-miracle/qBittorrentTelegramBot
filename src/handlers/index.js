@@ -6,5 +6,6 @@ const text = require("./text");
 module.exports = {
     document,
     start,
-    help, 
+    help,
+    text 
 }
