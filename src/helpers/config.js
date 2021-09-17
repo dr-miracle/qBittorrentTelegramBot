@@ -44,7 +44,7 @@ module.exports = (envPath, jsonPath) => {
     if (incorrectFields.length > 0){
         let finalContent = "";
         for(const key of Object.keys(fileContent)){
-            const str = `${key}=${fileContent[key]} \n`;
+            const str = `${key}=${fileContent[key]}\n`;
             finalContent += str;
         }
         fs.writeFileSync(envPath, finalContent, "utf-8");
