@@ -4,15 +4,7 @@ module.exports = class TelegramUsersStorage{
     constructor(jsonPath){
         this.jsonPath = jsonPath;
         //некрасиво, надо б распилить сохранение и чтение файла на разные функции
-        let json;
-        if (fs.existsSync(this.jsonPath)){
-            json = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        }else{
-            json = {
-                phrase: "DEFAULT_PHRASE",
-                users: []
-            }
-        }
+        let json = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));;
         const { phrase, users } = json;
         this.phrase = phrase;
         this.users = users;

@@ -1,13 +1,20 @@
 const fs = require('fs');
 
+const defaultFieldValue = "DEFAULT_FIELD_VALUE";
 const envFields = new Set([
     "TOKEN",
     "STORAGE",
     "CATEGORIES"
 ]);
-const defaultFieldValue = "DEFAULT_FIELD_VALUE";
 
-module.exports = (envPath) => {
+module.exports = (envPath, jsonPath) => {
+    if (!envPath){
+        throw new Error(".env path not setted");
+    }
+    if (!jsonPath){
+        throw new Error("JSON storage not setted");
+    }
+
     if (!fs.existsSync(envPath)){
         fs.writeFileSync(envPath, "");
     }
@@ -44,4 +51,11 @@ module.exports = (envPath) => {
         throw new Error(`Fields ${incorrectFields.join(', ')} in ${envPath} is empty or setted by default value`);
     }
 
+    if (!fs.existsSync(jsonPath)){
+        fs.writeFileSync(jsonPath, "");
+    }
+    const jsonContent = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    if (!jsonContent){
+        throw Error(`Incorrect JSON content in ${jsonPath}`);
+    }
 }
