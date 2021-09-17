@@ -1,5 +1,5 @@
 const config = { path: __dirname + "/../config.env" };
-require("./helpers/config")(config.path);
+require("./helpers/config")(config.path, "./users.json");
 require("dotenv").config(config);
 const http = require("http");
 const express = require("express");
