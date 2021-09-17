@@ -3,16 +3,16 @@ const categories = (() => process.env.CATEGORIES.split(","))();
 const TorrentsFilesystem = require("./helpers/fs");
 const torrentFs = new TorrentsFilesystem(process.env.STORAGE, categories);
 
-const torrentSearch = require("./helpers/search")(process.env.T_LOGIN, process.env.T_PASS);
-// const torrentSearch = new TorrentsSearch(process.env.T_LOGIN, process.env.T_PASS);
+require("./helpers/search")(process.env.T_LOGIN, process.env.T_PASS);
 
-const Auth = require("./helpers/auth");
-const userAuth = new Auth("./users.json");
-const authMiddleware = require("./middleware/auth")(userAuth);
+const TelegramUsersStorage = require("./helpers/usersStorage");
+const usersStorage = new TelegramUsersStorage("./users.json");
+const authMiddleware = require("./middleware/auth")(usersStorage);
 const torrentMenu = require("./middleware/menu")(torrentFs, categories);
 const { document, start: startHandler, help, text } = require("./handlers");
-//todo сделать отдельный метод для удаления сообщений через некоторое время
-//todo: добавить проверку на сущестование файла в fs. сравнивать по имени или MD5 хэшу
+//todo: проверку на корректность заполнения/существования файла конфигурации и users.json
+//todo: отдельный метод для удаления сообщений через некоторое время
+//todo: проверку на сущестование файла в fs. сравнивать по имени или MD5 хэшу
 
 const bot = new Telegraf(process.env.TOKEN);
 bot.use(authMiddleware);
@@ -40,7 +40,7 @@ const start = async() => {
     bot.launch();
 }
 const stop = () => {
-    userAuth.save();
+    usersStorage.save();
     bot.stop();
 }
 
@@ -49,7 +49,7 @@ const report = async (body) => {
         .split(".")[0]
         .replace("T", " ");
     const message = `${body.filename} скачан. ${date}`;
-    const chatIds = userAuth.chats();
+    const chatIds = usersStorage.chats;
     for(const chatId of chatIds){
         await bot.telegram.sendMessage(chatId, message)
     }
