@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "private": true,
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node --trace-warnings src/index.js",
     "report": "node reporter.js"
   },
   "keywords": [],
@@ -15,6 +15,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "node-fetch": "^2.6.1",
+    "rutracker-api": "^1.1.2",
     "telegraf": "^4.0.0",
     "telegraf-inline-menu": "^5.3.0"
   }

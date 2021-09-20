@@ -4,7 +4,9 @@ const defaultFieldValue = "DEFAULT_FIELD_VALUE";
 const envFields = new Set([
     "TOKEN",
     "STORAGE",
-    "CATEGORIES"
+    "CATEGORIES",
+    "T_LOGIN",
+    "T_PASS"
 ]);
 
 module.exports = (envPath, jsonPath) => {

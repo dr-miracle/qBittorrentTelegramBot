@@ -11,6 +11,7 @@ module.exports = (userStorage) => {
             const text = ctx.message.text;
             const isAdded = userStorage.addUser(ctx.from.id, ctx.chat.id, text);
             if (isAdded){
+                userStorage.save();
                 await ctx.reply('Welcome to the club, buddy');
                 return next();
             }else{
