@@ -5,12 +5,16 @@ module.exports = (torrentFs, categories) => {
     categoriesMenu.choose("category", categories, {
         do: async(ctx, categoryKey) => {
             const result = ctx.update.callback_query.message;
-            const fsPromise = torrentFs.save(ctx.torrent.link, ctx.torrent.filename, categoryKey);
+            const data = await torrentFs.download(ctx.torrent.link);
+            console.log(data);
+            const fsPromise = torrentFs.save(data, ctx.torrent.filename, categoryKey);
             return fsPromise
                 .then(_ => {
+                    console.log("detele message one");
                     return ctx.telegram.deleteMessage(result.chat.id, ctx.torrent.messageId)
                 })
                 .then(_ => {
+                    console.log("delete response");
                     return deleteMenuFromContext(ctx);
                 })
                 .then(_ => {

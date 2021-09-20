@@ -38,7 +38,7 @@ module.exports = () => {
         do: async ctx => {
             const id = ctx.torrent.torrents[ctx.torrent.torrentsIndex].id;
             const url = `${pageProvider.downloadUrl}?t=${encodeURIComponent(id)}`.replace("http", "https");
-            ctx.torrent.link = new URL(url);
+            ctx.torrent.link = url;
             ctx.torrent.filename = `${id}.torrent`;
             console.log(url);
             return '/category/';

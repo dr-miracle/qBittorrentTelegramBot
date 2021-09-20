@@ -1,5 +1,5 @@
 const fs = require('fs');
-const https = require('https');
+const request = require("axios");
 
 module.exports = class TorrentsFilesystem{
     constructor(pathTo, categories){
@@ -19,28 +19,47 @@ module.exports = class TorrentsFilesystem{
         return await Promise.all(dirs);
     }
 
-    save(filelink, filename, category){
-        console.log("FS", filelink, filename);
-        // filelink = filelink.replace("http", "https");
+    download(url){
+        console.log("FS: download", url);
+        return request({
+            url,
+            method: "GET",
+            responseType: "stream",
+        }).then(response => response.data);
+    }
+
+    save(data, filename, category){
+        console.log("FS", filename, category);
         const filepath = this.getFullPath(category);
-        let stream = fs.createWriteStream(`${filepath}\/${filename}`);
-        const fsPromise = new Promise( (resolve, reject) => {
-            const request = https.get(filelink, resp => {
-                if (resp.statusCode !== 200){
-                    reject(new Error(`Failed to get '${filelink}' (${resp.statusCode})`));
-                }
-                console.log(resp);
-                return resp.pipe(stream);
-            })
+        const fsPromise = new Promise((resolve, reject) => {
+            const stream = fs.createWriteStream(`${filepath}\/${filename}`);
             stream.on("finish", () => resolve(filename));
             stream.on('error', err => {
                 fs.unlink(filepath, () => reject(err));
-              });
-            request.on('error', err => {
-                fs.unlink(filepath, () => reject(err));
-              });
-        })
+            });
+            data.pipe(stream);
+        });
         return fsPromise;
+        // // filelink = filelink.replace("http", "https");
+        // const filepath = this.getFullPath(category);
+        // let stream = fs.createWriteStream(`${filepath}\/${filename}`);
+        // const fsPromise = new Promise( (resolve, reject) => {
+        //     const request = https.get(filelink, resp => {
+        //         if (resp.statusCode !== 200){
+        //             reject(new Error(`Failed to get '${filelink}' (${resp.statusCode})`));
+        //         }
+        //         console.log(resp);
+        //         return resp.pipe(stream);
+        //     })
+        //     stream.on("finish", () => resolve(filename));
+        //     stream.on('error', err => {
+        //         fs.unlink(filepath, () => reject(err));
+        //       });
+        //     request.on('error', err => {
+        //         fs.unlink(filepath, () => reject(err));
+        //       });
+        // })
+        // return fsPromise;
     }
 
     getFullPath(category){

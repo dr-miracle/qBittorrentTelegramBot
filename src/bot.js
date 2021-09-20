@@ -1,9 +1,9 @@
 const { Telegraf } = require("telegraf");
+require("./helpers/search")(process.env.T_LOGIN, process.env.T_PASS);
 const categories = (() => process.env.CATEGORIES.split(","))();
 const TorrentsFilesystem = require("./helpers/fs");
 const torrentFs = new TorrentsFilesystem(process.env.STORAGE, categories);
 
-require("./helpers/search")(process.env.T_LOGIN, process.env.T_PASS);
 
 const TelegramUsersStorage = require("./helpers/usersStorage");
 const usersStorage = new TelegramUsersStorage("./users.json");

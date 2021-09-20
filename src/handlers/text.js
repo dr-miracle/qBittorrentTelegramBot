@@ -9,5 +9,6 @@ module.exports = async(ctx) => {
         return ctx.reply(message, { parse_mode: 'Markdown' });
     }
     ctx.torrent.torrents = torrents;
+    ctx.torrent.messageId = ctx.message.message_id;
     return ctx.menu.torrentMenu.replyToContext(ctx, '/rutracker/');
 }
