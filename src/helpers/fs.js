@@ -20,13 +20,16 @@ module.exports = class TorrentsFilesystem{
     }
 
     save(filelink, filename, category){
+        console.log("FS", filelink, filename);
+        // filelink = filelink.replace("http", "https");
         const filepath = this.getFullPath(category);
         let stream = fs.createWriteStream(`${filepath}\/${filename}`);
         const fsPromise = new Promise( (resolve, reject) => {
             const request = https.get(filelink, resp => {
                 if (resp.statusCode !== 200){
-                    reject(new Error(`Failed to get '${filelink}' (${response.statusCode})`));
+                    reject(new Error(`Failed to get '${filelink}' (${resp.statusCode})`));
                 }
+                console.log(resp);
                 return resp.pipe(stream);
             })
             stream.on("finish", () => resolve(filename));
