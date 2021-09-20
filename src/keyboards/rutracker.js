@@ -1,4 +1,5 @@
 const { MenuTemplate, deleteMenuFromContext} = require("telegraf-inline-menu");
+const pageProvider = require("../helpers/search")().rutracker.pageProvider;
 
 function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
@@ -23,15 +24,24 @@ module.exports = () => {
     const menu = new MenuTemplate((ctx) => {
         const torrents = ctx.torrent.torrents;
         const index = ctx.torrent.torrentsIndex - 1;
-        console.log('rutracker: ', torrents, index);
         const torr = torrents[index];
         const text = markdownFormatter(torr);
 	    return { text, parse_mode: 'Markdown' }
     });
+    menu.url('Ссылка', ((ctx) => {
+        const id = ctx.torrent.torrents[ctx.torrent.torrentsIndex].id;
+        const url = `${pageProvider.threadUrl}?t=${encodeURIComponent(id)}`;
+        console.log(url);
+        return url
+    }));
     menu.interact('Скачать', 'download', {
         do: async ctx => {
-            console.log(ctx.torrent.torrentsIndex);
-            return false;
+            const id = ctx.torrent.torrents[ctx.torrent.torrentsIndex].id;
+            const url = `${pageProvider.downloadUrl}?t=${encodeURIComponent(id)}`.replace("http", "https");
+            ctx.torrent.link = new URL(url);
+            ctx.torrent.filename = `${id}.torrent`;
+            console.log(url);
+            return '/category/';
         }
     });
     menu.pagination("rutracker", {
