@@ -7,7 +7,7 @@ module.exports = class TorrentsFilesystem{
         this.categories = categories;
     }
 
-    async initFs(){
+    async init(){
         let dirs = [];
         this.categories.forEach(category => {
             const path = this.getFullPath(category);
@@ -19,8 +19,7 @@ module.exports = class TorrentsFilesystem{
         return await Promise.all(dirs);
     }
 
-    download(url){
-        console.log("FS: download", url);
+    async download(url){
         return request({
             url,
             method: "GET",
@@ -28,8 +27,7 @@ module.exports = class TorrentsFilesystem{
         }).then(response => response.data);
     }
 
-    save(data, filename, category){
-        console.log("FS", filename, category);
+    async save(data, filename, category){
         const filepath = this.getFullPath(category);
         const fsPromise = new Promise((resolve, reject) => {
             const stream = fs.createWriteStream(`${filepath}\/${filename}`);
@@ -40,26 +38,6 @@ module.exports = class TorrentsFilesystem{
             data.pipe(stream);
         });
         return fsPromise;
-        // // filelink = filelink.replace("http", "https");
-        // const filepath = this.getFullPath(category);
-        // let stream = fs.createWriteStream(`${filepath}\/${filename}`);
-        // const fsPromise = new Promise( (resolve, reject) => {
-        //     const request = https.get(filelink, resp => {
-        //         if (resp.statusCode !== 200){
-        //             reject(new Error(`Failed to get '${filelink}' (${resp.statusCode})`));
-        //         }
-        //         console.log(resp);
-        //         return resp.pipe(stream);
-        //     })
-        //     stream.on("finish", () => resolve(filename));
-        //     stream.on('error', err => {
-        //         fs.unlink(filepath, () => reject(err));
-        //       });
-        //     request.on('error', err => {
-        //         fs.unlink(filepath, () => reject(err));
-        //       });
-        // })
-        // return fsPromise;
     }
 
     getFullPath(category){

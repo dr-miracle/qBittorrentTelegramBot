@@ -3,27 +3,25 @@ require("./helpers/search")(process.env.T_LOGIN, process.env.T_PASS);
 const categories = (() => process.env.CATEGORIES.split(","))();
 const TorrentsFilesystem = require("./helpers/fs");
 const torrentFs = new TorrentsFilesystem(process.env.STORAGE, categories);
-
-
 const TelegramUsersStorage = require("./helpers/usersStorage");
 const usersStorage = new TelegramUsersStorage("./users.json");
 const authMiddleware = require("./middleware/auth")(usersStorage);
 const torrentMenu = require("./middleware/menu")(torrentFs, categories);
-const { document, start: startHandler, help, text } = require("./handlers");
-//todo: проверку на корректность заполнения/существования файла конфигурации и users.json
+const { document, start, help, text } = require("./handlers");
 //todo: отдельный метод для удаления сообщений через некоторое время
 //todo: проверку на сущестование файла в fs. сравнивать по имени или MD5 хэшу
-
+//todo: проверку на существование удаляемоего сообщения (см. prop torrents - если не существует - просто удалять сообщение)
+//todo: проверку доступности рутрекера
 const bot = new Telegraf(process.env.TOKEN);
 bot.use(authMiddleware);
 bot.use(torrentMenu.middleware());
 bot.on("text", text);
 bot.on("document", document);
 bot.help(help);
-bot.start(startHandler);
+bot.start(start);
 
-const start = async() => {
-    await torrentFs.initFs();
+const startup = async() => {
+    await torrentFs.init();
     bot.context.menu = { 
         torrentMenu: torrentMenu
      };
@@ -56,7 +54,7 @@ const report = async (body) => {
 }
 
 module.exports = {
-    start,
+    startup,
     stop,
     report
 };

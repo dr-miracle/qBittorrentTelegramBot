@@ -30,7 +30,7 @@ process.once("SIGTERM", () => {
 
 http.createServer(app).listen(process.env.PORT || 3000, () => {
     console.log(`Run server on localhost:${process.env.port || 3000}`);
-    bot.start()
+    bot.startup()
         .then(() => console.log("Bot started"))
         .catch((e) => console.log("Bot starting error: " + e));
 });

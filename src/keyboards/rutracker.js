@@ -1,4 +1,4 @@
-const { MenuTemplate, deleteMenuFromContext} = require("telegraf-inline-menu");
+const { MenuTemplate } = require("telegraf-inline-menu");
 const pageProvider = require("../helpers/search")().rutracker.pageProvider;
 
 function formatBytes(bytes, decimals = 2) {
@@ -31,7 +31,6 @@ module.exports = () => {
     menu.url('Ссылка', ((ctx) => {
         const id = ctx.torrent.torrents[ctx.torrent.torrentsIndex].id;
         const url = `${pageProvider.threadUrl}?t=${encodeURIComponent(id)}`;
-        console.log(url);
         return url
     }));
     menu.interact('Скачать', 'download', {
@@ -40,7 +39,6 @@ module.exports = () => {
             const url = `${pageProvider.downloadUrl}?t=${encodeURIComponent(id)}`.replace("http", "https");
             ctx.torrent.link = url;
             ctx.torrent.filename = `${id}.torrent`;
-            console.log(url);
             return '/category/';
         }
     });
