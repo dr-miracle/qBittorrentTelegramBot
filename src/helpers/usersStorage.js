@@ -1,6 +1,7 @@
 const fs = require('fs');
+const { usersStoragePath } = require('../config');
 /// синхронное сохранение из-за использования только в функции exit
-module.exports = class TelegramUsersStorage {
+class TelegramUsersStorage {
   constructor(jsonPath) {
     this.jsonPath = jsonPath;
     // некрасиво, надо б распилить сохранение и чтение файла на разные функции
@@ -39,4 +40,7 @@ module.exports = class TelegramUsersStorage {
     '\t');
     fs.writeFileSync(this.jsonPath, json);
   }
-};
+}
+const storage = new TelegramUsersStorage(usersStoragePath);
+
+module.exports = storage;

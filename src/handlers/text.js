@@ -1,4 +1,4 @@
-const torrentSearch = require('../helpers/search')();
+const torrentSearch = require('../helpers/search');
 
 module.exports = async (ctx) => {
   const { text } = ctx.message;

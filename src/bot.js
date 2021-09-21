@@ -1,24 +1,23 @@
-const { Telegraf } = require('telegraf');
-require('./helpers/search')(process.env.T_LOGIN, process.env.T_PASS);
-
-const categories = (() => process.env.CATEGORIES.split(','))();
-const TorrentsFilesystem = require('./helpers/fs');
-
-const torrentFs = new TorrentsFilesystem(process.env.STORAGE, categories);
-const TelegramUsersStorage = require('./helpers/usersStorage');
-
-const usersStorage = new TelegramUsersStorage('./users.json');
-const authMiddleware = require('./middleware/auth')(usersStorage);
-const torrentMenu = require('./middleware/menu')(torrentFs, categories);
-const {
-  document, start, help, text,
-} = require('./handlers');
 // todo: отдельный метод для удаления сообщений через некоторое время
 // todo: проверку на сущестование файла в fs. сравнивать по имени или MD5 хэшу
 // todo: проверку на существование удаляемоего сообщения
 // (см. prop torrents - если не существует - просто удалять сообщение)
 // todo: проверку доступности рутрекера
-const bot = new Telegraf(process.env.TOKEN);
+// todo: сделать возможно torrentFs и usersStorage в контекст
+// todo: при запуске stop если бот не запущен, кидается исключение. нужно пофиксить это
+const { Telegraf } = require('telegraf');
+const config = require('./config');
+
+const torrentFs = require('./helpers/fs');
+const usersStorage = require('./helpers/usersStorage');
+
+const authMiddleware = require('./middleware/auth');
+const torrentMenu = require('./middleware/menu');
+const {
+  document, start, help, text,
+} = require('./handlers');
+
+const bot = new Telegraf(config.telegramApiKey);
 bot.use(authMiddleware);
 bot.use(torrentMenu.middleware());
 bot.on('text', text);

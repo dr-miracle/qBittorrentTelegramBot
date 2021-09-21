@@ -1,4 +1,5 @@
 const RutrackerApi = require('rutracker-api');
+const { rutracker } = require('../config');
 
 class TorrentsSearch {
   constructor(username, password) {
@@ -17,10 +18,5 @@ class TorrentsSearch {
       });
   }
 }
-let search = null;
-module.exports = (login, password) => {
-  if (!search) {
-    search = new TorrentsSearch(login, password);
-  }
-  return search;
-};
+const search = new TorrentsSearch(rutracker.login, rutracker.password);
+module.exports = search;

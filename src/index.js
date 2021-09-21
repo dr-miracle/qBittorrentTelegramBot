@@ -1,14 +1,11 @@
-const path = require('path');
-
-const config = { path: path.join(__dirname, '/../config.env') };
-require('./helpers/config')(config.path, './users.json');
-require('dotenv').config(config);
 const http = require('http');
 const express = require('express');
+const config = require('./config');
+require('./helpers/search');
 const bot = require('./bot');
 
 const app = express();
-app.set('port', process.env.PORT || 3000);
+app.set('port', config.port || 3000);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.post('/report', async (req, res) => {

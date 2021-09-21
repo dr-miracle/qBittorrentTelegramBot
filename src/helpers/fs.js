@@ -1,10 +1,11 @@
 const fs = require('fs');
 const axios = require('axios');
+const { storagePath, categories } = require('../config');
 
-module.exports = class TorrentsFilesystem {
-  constructor(pathTo, categories) {
+class TorrentsFilesystem {
+  constructor(pathTo, torrentCategories) {
     this.pathTo = pathTo;
-    this.categories = categories;
+    this.categories = torrentCategories;
     this.request = axios;
   }
 
@@ -44,4 +45,7 @@ module.exports = class TorrentsFilesystem {
   getFullPath(category) {
     return `${this.pathTo}/${category}`;
   }
-};
+}
+const fileSystem = new TorrentsFilesystem(storagePath, categories);
+
+module.exports = fileSystem;
