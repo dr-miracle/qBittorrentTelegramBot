@@ -1,11 +1,16 @@
 const fs = require('fs');
 ///синхронное сохранение из-за использования только в функции exit
-module.exports = class AuthTelegramUser{
+module.exports = class TelegramUsersStorage{
     constructor(jsonPath){
         this.jsonPath = jsonPath;
-        const { phrase, users } = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+        //некрасиво, надо б распилить сохранение и чтение файла на разные функции
+        let json = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+        const { phrase, users } = json;
         this.phrase = phrase;
         this.users = users;
+    }
+    get chats(){
+        return Object.values(this.users);
     }
     addUser(userId, userChatId, phrase){
         if (phrase !== this.phrase){
@@ -28,9 +33,5 @@ module.exports = class AuthTelegramUser{
         null,
         "\t");
         fs.writeFileSync(this.jsonPath, json);
-    }
-    //заменить на геттер
-    chats(){
-        return Object.values(this.users);
     }
 }

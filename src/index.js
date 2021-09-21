@@ -1,4 +1,6 @@
-require("dotenv").config({path: __dirname + "/../config.env"});
+const config = { path: __dirname + "/../config.env" };
+require("./helpers/config")(config.path, "./users.json");
+require("dotenv").config(config);
 const http = require("http");
 const express = require("express");
 const bot = require("./bot");
@@ -28,7 +30,7 @@ process.once("SIGTERM", () => {
 
 http.createServer(app).listen(process.env.PORT || 3000, () => {
     console.log(`Run server on localhost:${process.env.port || 3000}`);
-    bot.start()
+    bot.startup()
         .then(() => console.log("Bot started"))
         .catch((e) => console.log("Bot starting error: " + e));
 });

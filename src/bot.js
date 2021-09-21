@@ -1,38 +1,44 @@
 const { Telegraf } = require("telegraf");
+require("./helpers/search")(process.env.T_LOGIN, process.env.T_PASS);
 const categories = (() => process.env.CATEGORIES.split(","))();
 const TorrentsFilesystem = require("./helpers/fs");
 const torrentFs = new TorrentsFilesystem(process.env.STORAGE, categories);
-
-const Auth = require("./helpers/auth");
-const userAuth = new Auth("./users.json");
-const authMiddleware = require("./middleware/auth")(userAuth);
-const torrentMenuMiddleware = require("./middleware/torrentMenu")(torrentFs, categories);
-const { document, start: startHandler, help } = require("./handlers");
-
+const TelegramUsersStorage = require("./helpers/usersStorage");
+const usersStorage = new TelegramUsersStorage("./users.json");
+const authMiddleware = require("./middleware/auth")(usersStorage);
+const torrentMenu = require("./middleware/menu")(torrentFs, categories);
+const { document, start, help, text } = require("./handlers");
+//todo: отдельный метод для удаления сообщений через некоторое время
+//todo: проверку на сущестование файла в fs. сравнивать по имени или MD5 хэшу
+//todo: проверку на существование удаляемоего сообщения (см. prop torrents - если не существует - просто удалять сообщение)
+//todo: проверку доступности рутрекера
 const bot = new Telegraf(process.env.TOKEN);
 bot.use(authMiddleware);
-bot.use(torrentMenuMiddleware.middleware());
+bot.use(torrentMenu.middleware());
+bot.on("text", text);
 bot.on("document", document);
 bot.help(help);
-bot.start(startHandler);
+bot.start(start);
 
-const start = async() => {
-    await torrentFs.initFs();
+const startup = async() => {
+    await torrentFs.init();
     bot.context.menu = { 
-        torrentMenuMiddleware
+        torrentMenu: torrentMenu
      };
      bot.context.torrent = {
          messageId: null,
-         torrentId: null,
-         filename: null
+         link: null,
+         filename: null,
+         torrents: [],
+         torrentsIndex: 1,
      }
     bot.catch((err, ctx) =>{
         console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
     });
-    bot.startPolling();
+    bot.launch();
 }
 const stop = () => {
-    userAuth.save();
+    usersStorage.save();
     bot.stop();
 }
 
@@ -41,14 +47,14 @@ const report = async (body) => {
         .split(".")[0]
         .replace("T", " ");
     const message = `${body.filename} скачан. ${date}`;
-    const chatIds = userAuth.chats();
+    const chatIds = usersStorage.chats;
     for(const chatId of chatIds){
         await bot.telegram.sendMessage(chatId, message)
     }
 }
 
 module.exports = {
-    start,
+    startup,
     stop,
     report
 };
