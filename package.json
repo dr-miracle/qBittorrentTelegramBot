@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "start": "node --trace-warnings src/index.js",
-    "report": "node reporter.js"
+    "report": "node reporter.js",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -19,5 +20,11 @@
     "rutracker-api": "^1.1.2",
     "telegraf": "^4.0.0",
     "telegraf-inline-menu": "^5.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-promise": "^5.1.0"
   }
 }
