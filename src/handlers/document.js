@@ -12,7 +12,7 @@ module.exports = async (ctx) => {
   const filelink = await ctx.telegram.getFileLink(ctx.message.document.file_id);
   ctx.torrent.link = filelink.href;
   if (!isTorrentExtension(filename)) {
-    replyAndDelayedDelete(ctx, 'Это не торрент! >.<', 1000);
+    replyAndDelayedDelete(ctx, 'Это не торрент! >.<');
   }
   await ctx.menu.torrentMenu.replyToContext(ctx, '/category/');
 };
