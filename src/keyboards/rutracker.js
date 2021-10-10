@@ -34,18 +34,18 @@ menu.url('Ссылка', ((ctx) => {
   const url = `${pageProvider.threadUrl}?t=${encodeURIComponent(id)}`;
   return url;
 }));
-menu.interact('Скачать', 'download', {
-  do: async (ctx) => {
-    const index = ctx.torrent.torrentsIndex - 1;
-    const torrent = ctx.torrent.torrents[index];
-    const { id } = torrent;
-    const url = `${pageProvider.downloadUrl}?t=${encodeURIComponent(id)}`.replace('http', 'https');
-    console.log(url);
-    ctx.torrent.link = url;
-    ctx.torrent.filename = `${id}.torrent`;
-    return '/category/';
-  },
-});
+// menu.interact('Скачать', 'download', {
+//   do: async (ctx) => {
+//     const index = ctx.torrent.torrentsIndex - 1;
+//     const torrent = ctx.torrent.torrents[index];
+//     const { id } = torrent;
+//     const url = `${pageProvider.downloadUrl}?t=${encodeURIComponent(id)}`.replace('http', 'https');
+//     console.log(url);
+//     ctx.torrent.link = url;
+//     ctx.torrent.filename = `${id}.torrent`;
+//     return '/category/';
+//   },
+// });
 menu.pagination('rutracker', {
   getTotalPages: (ctx) => ctx.torrent.torrents.length,
   getCurrentPage: (context) => context.torrent.torrentsIndex,
