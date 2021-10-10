@@ -22,21 +22,25 @@ const markdownFormatter = (torrent) => {
 };
 
 const menu = new MenuTemplate((ctx) => {
-  const { torrents } = ctx.torrent;
   const index = ctx.torrent.torrentsIndex - 1;
-  const torr = torrents[index];
-  const text = markdownFormatter(torr);
+  const torrent = ctx.torrent.torrents[index];
+  const text = markdownFormatter(torrent);
   return { text, parse_mode: 'Markdown' };
 });
 menu.url('Ссылка', ((ctx) => {
-  const { id } = ctx.torrent.torrents[ctx.torrent.torrentsIndex];
+  const index = ctx.torrent.torrentsIndex - 1;
+  const torrent = ctx.torrent.torrents[index];
+  const { id } = torrent;
   const url = `${pageProvider.threadUrl}?t=${encodeURIComponent(id)}`;
   return url;
 }));
 menu.interact('Скачать', 'download', {
   do: async (ctx) => {
-    const { id } = ctx.torrent.torrents[ctx.torrent.torrentsIndex];
+    const index = ctx.torrent.torrentsIndex - 1;
+    const torrent = ctx.torrent.torrents[index];
+    const { id } = torrent;
     const url = `${pageProvider.downloadUrl}?t=${encodeURIComponent(id)}`.replace('http', 'https');
+    console.log(url);
     ctx.torrent.link = url;
     ctx.torrent.filename = `${id}.torrent`;
     return '/category/';
