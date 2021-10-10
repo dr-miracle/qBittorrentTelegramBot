@@ -1,12 +1,13 @@
 const fs = require('fs');
-const axios = require('axios');
+// const axios = require('axios');
+const { pageProvider } = require('../helpers/search').rutracker;
 const { storagePath, categories } = require('../config');
 
 class TorrentsFilesystem {
   constructor(pathTo, torrentCategories) {
     this.pathTo = pathTo;
     this.categories = torrentCategories;
-    this.request = axios;
+    this.request = pageProvider.request;
   }
 
   async init() {
